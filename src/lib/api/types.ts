@@ -62,7 +62,9 @@ type TransactionStatus = {
   shop: string,
   signature: string,
   status: string,
-  transaction: string
+  transaction: string,
+  fees?: string,
+  net_amount?: string,
 }
 
 

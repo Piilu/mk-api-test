@@ -2,9 +2,16 @@
 	import type { AxiosError } from 'axios';
 	import Section from '$lib/components/section.svelte';
 	import type { Payment, FormData } from '$lib/api/types';
-	import { createTransactionLink, getData, getPaymentMethods, saveData } from '$lib/api';
-	import { useQuery } from '@sveltestack/svelte-query';
+	import {
+		createTransactionLink,
+		getData,
+		getPaymentMethods,
+		getPaymentStatus,
+		saveData
+	} from '$lib/api';
+	import { useMutation, useQuery } from '@sveltestack/svelte-query';
 	import type { PageServerData } from './$types';
+	import Details from '$lib/components/details.svelte';
 
 	//#region FormData
 	let formData: FormData = getData() ?? {
@@ -35,8 +42,10 @@
 	//#endregion
 
 	const methods = useQuery<Payment, AxiosError>('methods', () => getPaymentMethods(formData), {
-		enabled: formData.api_data.url !== ''
+		enabled: formData.api_data.url !== '' && formData.api_data.secret != ''
 	});
+
+	const status = useMutation((id: string) => getPaymentStatus(formData, id));
 
 	const countries = ['ee', 'lv', 'fi'];
 
@@ -52,15 +61,16 @@
 	}
 
 	export let data: PageServerData;
+	if (data.props.id) {
+		$status.mutate(data.props.id);
+	}
 </script>
 
 <svelte:head>
-	<title>Maksekeskus demo {data.props.status ? `| ${data.props.status}` : ''}</title>
+	<title>Maksekeskus demo {data.props.id ? `| ${data.props.id}` : ''}</title>
 </svelte:head>
-{#if data.props.status}
-	<h4 class={data.props.status === 'COMPLETED' ? 'text-success' : 'text-danger'}>
-		Staatus: {data.props.status}
-	</h4>
+{#if $status.data}
+	<Details data={$status.data} />
 {/if}
 
 <div class="d-flex flex-column gap-5">

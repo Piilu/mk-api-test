@@ -1,5 +1,5 @@
 import axios from "axios"
-import { type FormData, type Payment } from "./types"
+import { type FormData, type Payment, type TransactionStatus } from "./types"
 import { browser } from "$app/environment";
 
 const FORM_DATA = "formData";
@@ -14,6 +14,21 @@ async function getPaymentMethods(formData: FormData)
   });
 
   return data;
+}
+
+async function getPaymentStatus(formData: FormData, id: string)
+{
+  if (!browser) return null;
+  const { data } = await axios.post<TransactionStatus>(`${window.location.origin}/api/paymentStatus/info/`, {
+    auth: {
+      username: formData.api_data.shopId,
+      password: formData.api_data.secret
+    },
+    url: formData.api_data.url,
+    id: id
+  });
+  return data;
+
 }
 
 function createTransactionLink(data: FormData)
@@ -58,4 +73,4 @@ function distinctArray<T>(inputArray: T[]): T[]
   return distinctArray;
 }
 
-export { getPaymentMethods, createTransactionLink, saveData, getData, distinctArray }
+export { getPaymentMethods, createTransactionLink, saveData, getData, distinctArray, getPaymentStatus }

@@ -2,11 +2,11 @@ import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = (data) =>
 {
-  const status = data.url.searchParams.get("status");
+  const id = data.url.searchParams.get("id");
 
   return {
     props: {
-      status
+      id
     }
   }
 } 
